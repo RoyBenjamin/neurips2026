@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeurIPS 2026 from home</title>
+<meta name="description" content="Not in Sydney, Atlanta or Paris? The NeurIPS 2026 papers worth your time in your area: orals, spotlights, and the posters people are talking about.">
+<meta property="og:title" content="NeurIPS 2026 from home">
+<meta property="og:description" content="The NeurIPS 2026 papers worth your time in your area: orals, spotlights, and the posters people are talking about.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232B45C4'/><path d='M9 22V10l14 12V10' stroke='white' stroke-width='3' fill='none'/></svg>">
+</head>
+<body>
+<header class="masthead">
+  <p class="kicker" id="kicker">The NeurIPS 2026 main track, for everyone who isn't there</p>
+  <h1>NeurIPS 2026,<br>from home.</h1>
+  <p class="lede">Not in Sydney, Atlanta or Paris? Pick your area and read what matters: orals first, then spotlights, then the posters people are talking about.</p>
+</header>
+
+<main>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-browse" aria-controls="browse" aria-selected="true">Browse by area</button>
+    <button role="tab" id="tab-search" aria-controls="search" aria-selected="false">Search a topic</button>
+  </div>
+
+  <section id="browse" role="tabpanel" aria-labelledby="tab-browse">
+    <nav class="areas" aria-label="Research areas"></nav>
+    <div id="shelves"></div>
+  </section>
+
+  <section id="search" role="tabpanel" aria-labelledby="tab-search" hidden>
+    <label class="search-label" for="q">Type a topic or paste your abstract</label>
+    <textarea id="q" rows="3" placeholder="e.g. memory for long-horizon web agents"></textarea>
+    <p class="note" id="search-note" aria-live="polite"></p>
+    <ol class="list" id="results"></ol>
+  </section>
+</main>
+
+<footer>
+  <p id="asof"></p>
+  <p>Ranking: orals, then spotlights, then posters, each ordered by Hugging Face upvotes, alphaXiv votes and GitHub stars (log-scaled and added). A number only appears when we're sure it belongs to that paper. Research areas are grouped automatically from titles and abstracts, so some papers sit near a border.</p>
+  <p>Paper data from the official neurips.cc program. Your searches stay in your browser.</p>
+  <p class="credit">Inspired by Jueun Kim's <a href="https://juevn.github.io/neurips2026/">NeurIPS 2026 Explorer</a>.</p>
+</footer>
+
+<script src="data/papers.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
