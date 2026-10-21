@@ -62,8 +62,10 @@ button { font-family: inherit; color: inherit; }
 .brand span { font-family: var(--sans); font-weight: 500; font-size: 1rem; letter-spacing: 0; color: var(--muted); }
 .clocks { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; font-size: 0.85rem; color: var(--muted); }
 .clocks li { white-space: nowrap; }
-/* Wordmark and clocks share a text baseline (the two fonts sit differently when centred). */
-.brand, .clocks { align-self: baseline; }
+/* Wordmark and clocks share a text baseline (the two fonts sit differently when centred);
+   the pair is centred against the buttons, so the row lines up with or without the clocks. */
+.top-left { display: flex; align-items: baseline; gap: 1.25rem; min-width: 0; }
+.brand { line-height: 1; }
 .clocks b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; margin-left: 0.35rem; }
 .top-actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
 .pill-btn { font: 600 0.9rem var(--sans); background: var(--surface-2); border: 0; border-radius: 999px; padding: 0.45rem 0.85rem; cursor: pointer; white-space: nowrap; }

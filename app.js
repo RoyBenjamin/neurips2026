@@ -1,4 +1,4 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=382f778aae";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=284e6e6bad";
 
 const { meta, areas, papers } = window.CATCHUP;
 
@@ -19,7 +19,7 @@ const TRIES = ["RL for LLM reasoning", "memory for web agents", "diffusion langu
 
 /* Facts and live clocks: the conference is happening elsewhere, right now. */
 const cities = cityCounts(papers);
-$("#lede").textContent = `${num(papers.length)} papers in ${cities.map(([c]) => c).join(", ").replace(/, ([^,]*)$/, " and $1")}. Swipe through what people are talking about, or search your topic.`;
+$("#lede").textContent = `${num(papers.length)} papers in ${cities.length === 3 ? "three" : cities.length} cities. Swipe through the ones worth your time.`;
 // The hero's reading pile; the most talked-about paper lands on top.
 $("#pile").innerHTML = pilePapers(papers).reverse().map((p) =>
   `<button class="pile-card" type="button" data-open="${esc(p.id)}" aria-label="Open details: ${esc(p.t)}">
@@ -185,7 +185,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=382f778aae`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=284e6e6bad`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);
