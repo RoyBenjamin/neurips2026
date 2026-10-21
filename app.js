@@ -1,4 +1,4 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=41d980cb48";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=3e41359dee";
 
 const { meta, areas, papers } = window.CATCHUP;
 const $ = (s) => document.querySelector(s);
@@ -176,7 +176,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=41d980cb48`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=3e41359dee`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);
@@ -221,6 +221,11 @@ async function prepareRIS(link, ids) {
   link.href = url;
   link.removeAttribute("aria-disabled");
 }
+
+$("#close-detail").addEventListener("click", () => dialog.close());
+dialog.addEventListener("click", (e) => {
+  if (e.target === dialog) dialog.close(); // a click on the backdrop
+});
 
 /* One listener for opening papers and saving them, wherever they appear. */
 document.addEventListener("click", (e) => {
