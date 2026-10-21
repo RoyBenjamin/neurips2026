@@ -1,4 +1,4 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=8ea11c3100";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=382f778aae";
 
 const { meta, areas, papers } = window.CATCHUP;
 
@@ -142,7 +142,7 @@ const railHTML = (r, id = "") => `
 function renderRails() {
   $("#rails").innerHTML = `<div id="saved-rail"></div>` + rails(papers, areas).map((r, n) => (n === 2 ? `<div id="follow-slot"></div>` : "") + railHTML({
     ...r,
-    sub: r.area !== undefined ? `${areas[r.area].n_oral} orals, ${areas[r.area].n_spotlight} spotlights` : "",
+    sub: r.area !== undefined ? `${areas[r.area].n_oral} main talks, ${areas[r.area].n_spotlight} spotlights` : "",
     more: r.area !== undefined ? `data-area="${r.area}"` : "",
   })).join("");
   renderSavedRail();
@@ -177,7 +177,7 @@ function pickArea(k) {
     <details class="shelf tier-${s.tier}" open>
       <summary><h3>${s.title}</h3><span class="n">${s.items.length}</span><span class="why">${WHY[s.tier]}</span><span class="chev" aria-hidden="true">▾</span></summary>
       <div class="grid">${s.items.map((p) => card(p)).join("")}</div>
-    </details>`).join("") || `<p class="empty">No orals, spotlights or discussed posters here yet. Try searching the topic instead.</p>`;
+    </details>`).join("") || `<p class="empty">No main talks, spotlights or discussed posters here yet. Try searching the topic instead.</p>`;
 }
 
 /* Detail panel: everything about a paper without leaving the page. */
@@ -185,7 +185,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=8ea11c3100`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=382f778aae`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);

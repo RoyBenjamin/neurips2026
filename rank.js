@@ -1,7 +1,7 @@
 // Ranking and row rendering. Pure functions, no DOM, so they run under node --test.
 
-export const TIERS = ["Orals", "Spotlights", "Posters people are talking about"];
-const BADGES = ["Oral", "Spotlight", "Poster"];
+export const TIERS = ["Main talks", "Spotlights", "Posters people are talking about"];
+const BADGES = ["Main talk", "Spotlight", "Poster"];
 
 export function buzz(p) {
   return Math.log1p(p.hf || 0) + Math.log1p(p.ax || 0) + Math.log1p(p.st || 0);
@@ -99,7 +99,7 @@ const RAIL_SIZE = 20;
 export function rails(papers, areas, size = RAIL_SIZE) {
   const out = [
     { title: "Most talked-about this week", items: papers.filter((p) => buzz(p) > 0).sort(byBuzz).slice(0, size) },
-    { title: "Orals everyone's reading", items: papers.filter((p) => p.tier === 0).sort(byBuzz).slice(0, size) },
+    { title: "Main talks everyone's reading", items: papers.filter((p) => p.tier === 0).sort(byBuzz).slice(0, size) },
   ];
   areas.forEach((a, k) => out.push({ title: a.name, area: k, items: shelves(papers, k).flatMap((s) => s.items).slice(0, size) }));
   return out.filter((r) => r.items.length);
