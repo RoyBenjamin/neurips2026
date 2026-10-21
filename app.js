@@ -1,6 +1,11 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=fc22533828";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=1824c19ac7";
 
 const { meta, areas, papers } = window.CATCHUP;
+
+// Anonymous usage counts (Umami, no cookies). A no-op until the analytics script loads.
+function track(name, data) {
+  try { window.umami?.track(name, data); } catch {}
+}
 const $ = (s) => document.querySelector(s);
 const num = (n) => n.toLocaleString("en");
 const byId = new Map(papers.map((p) => [p.id, p]));
@@ -90,9 +95,12 @@ function renderSaved() {
     ? "All your saved papers are on arXiv."
     : `Covers the ${onArxiv} of your ${list.length} saved papers that are on arXiv.`;
 }
-$("#copy-ids").addEventListener("click", () =>
-  copy($("#copy-ids"), arxivIds(saved.map((id) => byId.get(id))), "Copy arXiv IDs"));
+$("#copy-ids").addEventListener("click", () => {
+  track("copy-arxiv-ids", { count: saved.length });
+  copy($("#copy-ids"), arxivIds(saved.map((id) => byId.get(id))), "Copy arXiv IDs");
+});
 $("#open-saved").addEventListener("click", () => {
+  track("view-reading-list", { count: saved.length });
   renderSaved();
   showView("saved");
   setHash("#saved");
@@ -151,6 +159,7 @@ document.addEventListener("click", (e) => {
   }
   const more = e.target.closest("[data-area]:not([data-abstract-for])");
   if (more && more.classList.contains("see-all")) {
+    track("open-area", { area: areas[+more.dataset.area].name });
     pickArea(+more.dataset.area);
     setHash(`#area=${encodeURIComponent(areas[+more.dataset.area].name)}`);
     toMain();
@@ -176,7 +185,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=fc22533828`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=1824c19ac7`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);
@@ -235,13 +244,19 @@ document.addEventListener("click", (e) => {
     const on = !isSaved(id);
     saved = on ? [...saved, id] : saved.filter((x) => x !== id);
     persist();
+    track(on ? "save" : "unsave");
     document.querySelectorAll(`[data-save="${CSS.escape(id)}"]`).forEach((b) => markSave(b, on));
     renderSavedRail();
     if (!$("#view-saved").hidden) renderSaved();
     return;
   }
   const open = e.target.closest("[data-open]");
-  if (open) openDetail(open.dataset.open);
+  if (open) {
+    const from = open.closest(".pile") ? "pile" : open.closest("#results") ? "search" : open.closest("#saved-list, #saved-rail") ? "reading-list" : open.closest("#shelves") ? "area" : "rail";
+    const p = byId.get(open.dataset.open);
+    track("open-paper", { from, tier: ["oral", "spotlight", "poster"][p.tier], area: areas[p.a].name });
+    openDetail(open.dataset.open);
+  }
 });
 
 /* Search: title words right away, meaning-based once the model has loaded. */
@@ -264,7 +279,17 @@ function startSearch() {
   });
 }
 q.addEventListener("focus", startSearch, { once: true });
+// A typed search counts once, after the visitor pauses (never the text itself).
+let typedTimer, lastCounted = "";
+const countTyped = () => {
+  clearTimeout(typedTimer);
+  if (q.value.trim() === lastCounted) return; // same search, already counted
+  lastCounted = q.value.trim();
+  track("search", { via: "typed" });
+};
 q.addEventListener("input", () => {
+  clearTimeout(typedTimer);
+  if (q.value.trim()) typedTimer = setTimeout(countTyped, 2000);
   q.style.height = "auto";
   q.style.height = `${q.scrollHeight}px`;
   clearTimeout(timer);
@@ -273,11 +298,13 @@ q.addEventListener("input", () => {
 q.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
+    countTyped();
     runSearch(true);
   }
 });
 $("#search-form").addEventListener("submit", (e) => {
   e.preventDefault();
+  countTyped();
   runSearch(true);
 });
 $("#tries").innerHTML = TRIES.map((t) => `<button type="button">${esc(t)}</button>`).join("");
@@ -285,6 +312,7 @@ $("#tries").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
   q.value = b.textContent;
+  track("search", { via: "try-chip", chip: b.textContent });
   startSearch();
   runSearch(true);
 });
@@ -292,6 +320,7 @@ $("#clear-search").addEventListener("click", () => {
   q.value = "";
   goHome();
 });
+$("#copy-search").addEventListener("click", () => track("copy-search-link"));
 $("#copy-search").addEventListener("click", () => copy($("#copy-search"), location.href, "Copy link"));
 
 let timer, latest = 0;

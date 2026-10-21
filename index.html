@@ -15,7 +15,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn-thumbnails.huggingface.co">
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=fc22533828">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="94aa27b7-892a-4967-a56b-8dd4512ee132" data-domains="roybenjamin.com"></script>
+<link rel="stylesheet" href="style.css?v=1824c19ac7">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232747D9'/><circle cx='16' cy='16' r='8' fill='none' stroke='%23FFB627' stroke-width='3'/><path d='M16 11v5l3 2' stroke='%23FFB627' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
 </head>
 <body>
@@ -24,8 +25,8 @@
     <a class="brand" href="#" id="home-link">NeurIPS 2026<span>, from home</span></a>
     <ul class="clocks" id="clocks" aria-label="Local time in each conference city"></ul>
     <div class="top-actions">
-      <a class="pill-btn follow-top" href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">Follow on LinkedIn</a>
-      <a class="theme follow-icon" href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener" aria-label="Follow Roy on LinkedIn" title="Follow Roy on LinkedIn">
+      <a class="pill-btn follow-top" href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="topbar" target="_blank" rel="noopener">Follow on LinkedIn</a>
+      <a class="theme follow-icon" href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="topbar-phone" target="_blank" rel="noopener" aria-label="Follow Roy on LinkedIn" title="Follow Roy on LinkedIn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM3.3 9h3.4v11.5H3.3V9Zm5.6 0h3.3v1.6h.05c.46-.87 1.58-1.8 3.26-1.8 3.48 0 4.12 2.29 4.12 5.27v6.43h-3.4v-5.7c0-1.36-.03-3.1-1.9-3.1-1.9 0-2.19 1.48-2.19 3v5.8H8.9V9Z"/></svg>
       </a>
       <button class="pill-btn" id="open-saved" type="button" aria-label="Reading list"><svg class="list-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span class="label">Reading list</span> <span class="count" id="saved-count">0</span></button>
@@ -110,7 +111,7 @@
         <div class="way">
           <h4>As a file</h4>
           <ol>
-            <li><a class="btn quiet small" id="zotero-saved" download="neurips2026-reading-list.ris" aria-disabled="true">Download the file</a></li>
+            <li><a class="btn quiet small" id="zotero-saved" data-umami-event="zotero-download" data-umami-event-what="reading-list" download="neurips2026-reading-list.ris" aria-disabled="true">Download the file</a></li>
             <li>In Zotero, choose File, then Import</li>
             <li>For a PDF, right-click a paper and choose Find Available PDF</li>
           </ol>
@@ -127,7 +128,7 @@
       <h2>Liked finding papers this way?</h2>
       <p>I write about AI/ML research and the business of AI on LinkedIn, including paper reviews: what a paper does, why it matters, and whether it's worth your time. Follow along for more.</p>
     </div>
-    <a class="btn amber" href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">Follow Roy on LinkedIn</a>
+    <a class="btn amber" href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="banner" target="_blank" rel="noopener">Follow Roy on LinkedIn</a>
   </aside>
 </main>
 
@@ -138,16 +139,16 @@
 
 <footer class="page">
   <div class="maker">
-    <p>Made by <strong>Roy Benjamin</strong>. <a href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">LinkedIn</a> <a href="https://roybenjamin.com" target="_blank" rel="noopener">Website</a></p>
-    <a class="btn quiet small coffee" href="https://buymeacoffee.com/roybenjamin" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+    <p>Made by <strong>Roy Benjamin</strong>. <a href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="footer" target="_blank" rel="noopener">LinkedIn</a> <a href="https://roybenjamin.com" target="_blank" rel="noopener" data-umami-event="website">Website</a></p>
+    <a class="btn quiet small coffee" href="https://buymeacoffee.com/roybenjamin" data-umami-event="coffee" target="_blank" rel="noopener">☕ Buy me a coffee</a>
   </div>
   <p id="asof"></p>
   <p>How papers are ranked: orals, then spotlights, then posters, each ordered by Hugging Face upvotes, alphaXiv votes and GitHub stars (log-scaled and added). A number only appears when we're sure it belongs to that paper. Search orders by match, with a small lift for orals, spotlights and buzz. Areas are grouped automatically from titles and abstracts. First-page images come from Hugging Face.</p>
-  <p>Paper data from the official neurips.cc program. Your searches and reading list stay in your browser.</p>
+  <p>Paper data from the official neurips.cc program. Visits and clicks are counted anonymously, with no cookies. What you search and save stays in your browser.</p>
   <p class="credit">Inspired by Jueun Kim's <a href="https://juevn.github.io/neurips2026/">NeurIPS 2026 Explorer</a>.</p>
 </footer>
 
-<script src="data/papers.js?v=fc22533828"></script>
-<script type="module" src="app.js?v=fc22533828"></script>
+<script src="data/papers.js?v=1824c19ac7"></script>
+<script type="module" src="app.js?v=1824c19ac7"></script>
 </body>
 </html>

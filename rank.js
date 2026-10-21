@@ -137,15 +137,18 @@ export function cardHTML(p, { saved = false, match } = {}) {
 </article>`;
 }
 
+// Umami counts clicks on links carrying these attributes.
+const out = (to) => `data-umami-event="outbound" data-umami-event-to="${to}"`;
+
 // Everything about one paper, for the detail panel.
 export function detailHTML(p, { area = "", saved = false } = {}) {
   const thumb = thumbURL(p);
   const links = [
-    `<a class="btn amber small" href="${esc(paperURL(p))}">NeurIPS page</a>`,
-    p.o && `<a class="btn quiet small" href="https://openreview.net/forum?id=${esc(p.o)}">OpenReview</a>`,
-    p.c && `<a class="btn quiet small" href="${esc(p.c)}">Code</a>`,
-    p.x && `<a class="btn quiet small" href="https://www.alphaxiv.org/abs/${esc(p.x)}">alphaXiv</a>`,
-    `<a class="btn quiet small" data-zotero="${esc(p.id)}" download="neurips2026-${esc(p.id)}.ris" aria-disabled="true" title="Downloads a .ris file. In Zotero: File, Import.">Add to Zotero</a>`,
+    `<a class="btn amber small" href="${esc(paperURL(p))}" ${out("neurips")}>NeurIPS page</a>`,
+    p.o && `<a class="btn quiet small" href="https://openreview.net/forum?id=${esc(p.o)}" ${out("openreview")}>OpenReview</a>`,
+    p.c && `<a class="btn quiet small" href="${esc(p.c)}" ${out("code")}>Code</a>`,
+    p.x && `<a class="btn quiet small" href="https://www.alphaxiv.org/abs/${esc(p.x)}" ${out("alphaxiv")}>alphaXiv</a>`,
+    `<a class="btn quiet small" data-umami-event="zotero-download" data-umami-event-what="paper" data-zotero="${esc(p.id)}" download="neurips2026-${esc(p.id)}.ris" aria-disabled="true" title="Downloads a .ris file. In Zotero: File, Import.">Add to Zotero</a>`,
   ].filter(Boolean).join("");
   const facts = [`<span class="badge">${BADGES[p.tier]}</span>`, area && `<span>${esc(area)}</span>`, p.s && `<span>${esc(p.s)}</span>`].filter(Boolean).join("");
   return `<div class="detail tier-${p.tier}">
