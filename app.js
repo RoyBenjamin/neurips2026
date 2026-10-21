@@ -1,4 +1,4 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=5c9378599b";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=41d980cb48";
 
 const { meta, areas, papers } = window.CATCHUP;
 const $ = (s) => document.querySelector(s);
@@ -40,8 +40,12 @@ $("#theme").addEventListener("click", () => {
 /* Views: home (rails), search, area, reading list */
 const VIEWS = ["home", "search", "area", "saved"];
 const setHash = (h) => history.replaceState(null, "", h || location.pathname + location.search);
+// The follow banner sits early on the home page (most visitors scroll that far), else at the end.
 function showView(view) {
   VIEWS.forEach((v) => ($(`#view-${v}`).hidden = v !== view));
+  const slot = $("#follow-slot");
+  if (view === "home" && slot) slot.append($("#follow"));
+  else $("#main").append($("#follow"));
 }
 function goHome() {
   showView("home");
@@ -128,7 +132,7 @@ const railHTML = (r, id = "") => `
     </div>
   </section>`;
 function renderRails() {
-  $("#rails").innerHTML = `<div id="saved-rail"></div>` + rails(papers, areas).map((r) => railHTML({
+  $("#rails").innerHTML = `<div id="saved-rail"></div>` + rails(papers, areas).map((r, n) => (n === 2 ? `<div id="follow-slot"></div>` : "") + railHTML({
     ...r,
     sub: r.area !== undefined ? `${areas[r.area].n_oral} orals, ${areas[r.area].n_spotlight} spotlights` : "",
     more: r.area !== undefined ? `data-area="${r.area}"` : "",
@@ -172,7 +176,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=5c9378599b`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=41d980cb48`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);
@@ -319,6 +323,7 @@ async function runSearch(scroll = false) {
 
 /* Start from the URL so links can be shared. */
 renderRails();
+showView("home");
 const start = parseHash(location.hash, areas);
 if (location.hash.startsWith("#area=")) pickArea(start.area);
 else if (location.hash === "#saved") {
