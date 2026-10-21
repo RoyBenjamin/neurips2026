@@ -18,10 +18,21 @@ export function shelves(papers, areaIndex, posterCap = 20) {
   }).filter((s) => s.items.length);
 }
 
-export function searchScore(sim, p) {
-  return sim + 0.04 * (2 - p.tier) + 0.01 * buzz(p);
+export function cityCounts(papers) {
+  const counts = {};
+  for (const p of papers) {
+    const city = (p.s || "").split(" ")[0];
+    if (city) counts[city] = (counts[city] || 0) + 1;
+  }
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]);
 }
 
+// Match decides; tier and buzz add at most 0.03, so they only break near-ties.
+export function searchScore(sim, p) {
+  return sim + 0.01 * (2 - p.tier) + 0.001 * Math.min(buzz(p), 10);
+}
+
+// Closest papers by meaning; each result carries its match (cosine similarity) as `m`.
 export function topK(queryVec, emb, papers, k = 50) {
   const dim = queryVec.length;
   const scored = papers.map((p, n) => {
@@ -31,7 +42,8 @@ export function topK(queryVec, emb, papers, k = 50) {
       dot += v * queryVec[d];
       norm += v * v;
     }
-    return [searchScore(norm ? dot / Math.sqrt(norm) : 0, p), p];
+    const sim = norm ? dot / Math.sqrt(norm) : 0;
+    return [searchScore(sim, p), { ...p, m: sim }];
   });
   return scored.sort((a, b) => b[0] - a[0]).slice(0, k).map(([, p]) => p);
 }
@@ -50,46 +62,137 @@ export function keywordSearch(query, papers, k = 50) {
     .map(([, p]) => p);
 }
 
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-
-function compact(n) {
-  return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
-}
-
-function institutions(list) {
-  if (!list.length) return "";
-  const shown = list.slice(0, 3).map(esc).join(", ");
-  return list.length > 3 ? `${shown} and ${list.length - 3} more` : shown;
-}
-
-export function rowHTML(p, rank, { badge = false } = {}) {
-  const stats = [
-    p.hf !== undefined && `<a class="stat" href="https://huggingface.co/papers/${esc(p.x)}" title="Hugging Face upvotes">🤗 ${compact(p.hf)}</a>`,
-    p.ax !== undefined && `<a class="stat" href="https://www.alphaxiv.org/abs/${esc(p.x)}" title="alphaXiv votes">αX ${compact(p.ax)}</a>`,
-    p.st !== undefined && `<a class="stat" href="${esc(p.c)}" title="GitHub stars">★ ${compact(p.st)}</a>`,
-  ].filter(Boolean).join("");
-  const links = [
-    `<a href="https://neurips.cc/virtual/2026/${esc(p.u)}">NeurIPS page</a>`,
-    p.o && `<a href="https://openreview.net/forum?id=${esc(p.o)}">OpenReview</a>`,
-    p.c && `<a href="${esc(p.c)}">Code</a>`,
-  ].filter(Boolean).join("");
-  return `<li class="paper tier-${p.tier}">
-  <span class="rank">${rank}</span>
-  <div class="body">
-    ${badge ? `<span class="badge" title="${BADGES[p.tier]} at NeurIPS 2026">${BADGES[p.tier]}</span>` : ""}
-    <a class="title" href="https://neurips.cc/virtual/2026/${esc(p.u)}">${esc(p.t)}</a>
-    ${p.i.length ? `<p class="inst">${institutions(p.i)}</p>` : ""}
-    <div class="meta">${stats ? `<span class="stats">${stats}</span>` : ""}<span class="links">${links}</span></div>
-  </div>
-</li>`;
-}
-
-// "#area=<name>" or "#search"; a mangled link falls back to the first area.
+// "#area=<name>", "#search" or "#search=<query>"; a mangled link falls back to the first area.
 export function parseHash(hash, areas) {
   let h = "";
   try {
     h = decodeURIComponent(hash.replace(/^#/, ""));
   } catch {}
   const area = areas.findIndex((a) => h === `area=${a.name}`);
-  return { area: Math.max(area, 0), search: h === "search" };
+  const search = h === "search" ? "" : h.startsWith("search=") ? h.slice(7) : null;
+  return { area: Math.max(area, 0), search };
+}
+
+export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+function compact(n) {
+  return n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
+}
+
+const paperURL = (p) => `https://neurips.cc/virtual/2026/${p.u}`;
+
+export function readingListText(papers) {
+  return "My NeurIPS 2026 reading list\n\n" +
+    papers.map((p, n) => `${n + 1}. ${p.t} (${BADGES[p.tier]}) ${paperURL(p)}`).join("\n") + "\n";
+}
+
+const ZONES = { Sydney: "Australia/Sydney", Atlanta: "America/New_York", Paris: "Europe/Paris" };
+
+export function cityTime(city, at = new Date()) {
+  return at.toLocaleTimeString("en-US", { timeZone: ZONES[city], hour: "numeric", minute: "2-digit" }).toLowerCase();
+}
+
+
+const RAIL_SIZE = 20;
+
+// The home page: most talked-about overall, orals by buzz, then one rail per area.
+export function rails(papers, areas, size = RAIL_SIZE) {
+  const out = [
+    { title: "Most talked-about this week", items: papers.filter((p) => buzz(p) > 0).sort(byBuzz).slice(0, size) },
+    { title: "Orals everyone's reading", items: papers.filter((p) => p.tier === 0).sort(byBuzz).slice(0, size) },
+  ];
+  areas.forEach((a, k) => out.push({ title: a.name, area: k, items: shelves(papers, k).flatMap((s) => s.items).slice(0, size) }));
+  return out.filter((r) => r.items.length);
+}
+
+export function thumbURL(p) {
+  return p.x ? `https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/${p.x}.png` : null;
+}
+
+function buzzLine(p) {
+  return [p.hf !== undefined && `🤗 ${compact(p.hf)}`, p.ax !== undefined && `αX ${compact(p.ax)}`, p.st !== undefined && `★ ${compact(p.st)}`]
+    .filter(Boolean).map((s) => `<span>${s}</span>`).join("");
+}
+
+function saveButton(p, saved) {
+  return `<button class="save" type="button" data-save="${esc(p.id)}" aria-pressed="${saved}" title="${saved ? "Remove from" : "Save to"} your reading list">${saved ? "Saved" : "Save"}</button>`;
+}
+
+// A poster-like card for rails and grids; the cover is the paper's first page when we have it.
+export function cardHTML(p, { saved = false, match } = {}) {
+  const thumb = thumbURL(p);
+  const cover = thumb
+    ? `<img src="${esc(thumb)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('nothumb');this.remove()">`
+    : "";
+  return `<article class="tcard tier-${p.tier}">
+  <button class="cover${thumb ? "" : " nothumb"}" type="button" data-open="${esc(p.id)}" aria-label="Open details: ${esc(p.t)}">
+    ${cover}<span class="cover-title">${esc(p.t)}</span>
+    <span class="tier-pill">${BADGES[p.tier]}</span>
+  </button>
+  <div class="tcard-body">
+    <button class="tcard-title" type="button" data-open="${esc(p.id)}">${esc(p.t)}</button>
+    ${match !== undefined ? `<span class="match"><i style="--m:${Math.round(match * 100)}%"></i>${Math.round(match * 100)}% match</span>` : ""}
+    <div class="tcard-foot"><span class="buzzline">${buzzLine(p)}</span>${saveButton(p, saved)}</div>
+  </div>
+</article>`;
+}
+
+// Everything about one paper, for the detail panel.
+export function detailHTML(p, { area = "", saved = false } = {}) {
+  const thumb = thumbURL(p);
+  const links = [
+    `<a class="btn amber small" href="${esc(paperURL(p))}">NeurIPS page</a>`,
+    p.o && `<a class="btn quiet small" href="https://openreview.net/forum?id=${esc(p.o)}">OpenReview</a>`,
+    p.c && `<a class="btn quiet small" href="${esc(p.c)}">Code</a>`,
+    p.x && `<a class="btn quiet small" href="https://www.alphaxiv.org/abs/${esc(p.x)}">alphaXiv</a>`,
+    `<a class="btn quiet small" data-zotero="${esc(p.id)}" download="neurips2026-${esc(p.id)}.ris" aria-disabled="true" title="Downloads a .ris file. In Zotero: File, Import.">Add to Zotero</a>`,
+  ].filter(Boolean).join("");
+  const facts = [`<span class="badge">${BADGES[p.tier]}</span>`, area && `<span>${esc(area)}</span>`, p.s && `<span>${esc(p.s)}</span>`].filter(Boolean).join("");
+  return `<div class="detail tier-${p.tier}">
+  ${thumb ? `<img class="detail-thumb" src="${esc(thumb)}" alt="First page of the paper" onerror="this.remove()">` : ""}
+  <div class="detail-facts">${facts}</div>
+  <h2 class="detail-title" id="detail-title">${esc(p.t)}</h2>
+  <p class="detail-authors"></p>
+  ${p.i.length ? `<p class="orgs">${p.i.map((name, k) => `<span class="org${(p.co || []).includes(k) ? " company" : ""}">${esc(name)}</span>`).join("")}</p>` : ""}
+  <div class="detail-actions">${saveButton(p, saved)}<span class="buzzline">${buzzLine(p)}</span></div>
+  <div class="detail-abstract" data-abstract-for="${esc(p.id)}" data-area="${p.a}">Loading the abstract…</div>
+  <div class="detail-links">${links}</div>
+</div>`;
+}
+
+// The hero's "reading pile": this week's most talked-about papers that have a first page to show.
+export function pilePapers(papers, n = 4) {
+  return papers.filter((p) => p.x && buzz(p) > 0).sort(byBuzz).slice(0, n);
+}
+
+export function pileTag(p) {
+  const loudest = [["st", "★"], ["hf", "🤗"], ["ax", "αX"]]
+    .filter(([k]) => p[k] !== undefined && p[k] > 0)
+    .sort((a, b) => p[b[0]] - p[a[0]])[0];
+  return loudest ? `${BADGES[p.tier]}, ${loudest[1]} ${compact(p[loudest[0]])}` : BADGES[p.tier];
+}
+
+const bareArxiv = (x) => x.replace(/v\d+$/, "");
+
+// The best link to the paper itself: arXiv PDF, then OpenReview PDF, then the NeurIPS page.
+function pdfURL(p) {
+  return p.x ? `https://arxiv.org/pdf/${p.x}` : p.o ? `https://openreview.net/pdf?id=${p.o}` : paperURL(p);
+}
+
+// One RIS record per paper; Zotero (and most reference managers) import these directly.
+// Its link opens the PDF, so Zotero's "Find Available PDF" can attach it.
+export function risFor(p, { authors = [], abstract = "" } = {}) {
+  const one = (s) => String(s).replace(/\s+/g, " ").trim();
+  const note = `${BADGES[p.tier]} at NeurIPS 2026${p.s ? `, ${p.s}` : ""}. NeurIPS page: ${paperURL(p)}`;
+  const lines = ["TY  - CPAPER", `TI  - ${one(p.t)}`, ...authors.map((a) => `AU  - ${one(a)}`),
+    "T2  - Advances in Neural Information Processing Systems (NeurIPS 2026)", "PY  - 2026", `UR  - ${pdfURL(p)}`];
+  if (p.x) lines.push(`DO  - 10.48550/arXiv.${bareArxiv(p.x)}`);
+  if (abstract) lines.push(`AB  - ${one(abstract)}`);
+  lines.push(`N1  - ${note}`, "ER  - ");
+  return lines.join("\n") + "\n";
+}
+
+// For Zotero's "Add Item by Identifier": it fetches each paper and attaches the PDF.
+export function arxivIds(papers) {
+  return papers.filter((p) => p.x).map((p) => bareArxiv(p.x)).join("\n");
 }

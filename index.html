@@ -4,49 +4,147 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NeurIPS 2026 from home</title>
-<meta name="description" content="Not in Sydney, Atlanta or Paris? The NeurIPS 2026 papers worth your time in your area: orals, spotlights, and the posters people are talking about.">
+<meta name="description" content="Not in Sydney, Atlanta or Paris? Swipe through the NeurIPS 2026 papers people are talking about, the orals, and the best of your area.">
 <meta property="og:title" content="NeurIPS 2026 from home">
-<meta property="og:description" content="The NeurIPS 2026 papers worth your time in your area: orals, spotlights, and the posters people are talking about.">
+<meta property="og:description" content="Swipe through the NeurIPS 2026 papers people are talking about, the orals, and the best of your area.">
+<script>
+  // Apply a saved theme before first paint, so the page doesn't flash.
+  try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232B45C4'/><path d='M9 22V10l14 12V10' stroke='white' stroke-width='3' fill='none'/></svg>">
+<link rel="preconnect" href="https://cdn-thumbnails.huggingface.co">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5c9378599b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232747D9'/><circle cx='16' cy='16' r='8' fill='none' stroke='%23FFB627' stroke-width='3'/><path d='M16 11v5l3 2' stroke='%23FFB627' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
 </head>
 <body>
-<header class="masthead">
-  <p class="kicker" id="kicker">The NeurIPS 2026 main track, for everyone who isn't there</p>
-  <h1>NeurIPS 2026,<br>from home.</h1>
-  <p class="lede">Not in Sydney, Atlanta or Paris? Pick your area and read what matters: orals first, then spotlights, then the posters people are talking about.</p>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" id="home-link">NeurIPS 2026<span>, from home</span></a>
+    <ul class="clocks" id="clocks" aria-label="Local time in each conference city"></ul>
+    <div class="top-actions">
+      <a class="pill-btn follow-top" href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">Follow on LinkedIn</a>
+      <button class="pill-btn" id="open-saved" type="button">Reading list <span class="count" id="saved-count">0</span></button>
+      <button class="theme" id="theme" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
 </header>
 
-<main>
-  <div class="tabs" role="tablist">
-    <button role="tab" id="tab-browse" aria-controls="browse" aria-selected="true">Browse by area</button>
-    <button role="tab" id="tab-search" aria-controls="search" aria-selected="false">Search a topic</button>
+<section class="hero">
+  <div class="page hero-grid">
+    <div class="hero-title">
+      <h1>NeurIPS 2026,<br>from home.</h1>
+      <p class="lede" id="lede">Thousands of papers in Sydney, Atlanta and Paris. Swipe through what people are talking about, or search your topic.</p>
+    </div>
+    <div class="pile" id="pile" aria-label="This week's most talked-about papers"></div>
+    <div class="hero-search">
+      <form id="search-form" class="search-box" role="search">
+        <label class="sr-only" for="q">Search by topic or paste your abstract</label>
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <textarea id="q" rows="1" placeholder="Topic or abstract"></textarea>
+        <button class="btn amber" type="submit">Search</button>
+      </form>
+      <div class="try"><span>Try</span><span id="tries"></span></div>
+    </div>
   </div>
+</section>
 
-  <section id="browse" role="tabpanel" aria-labelledby="tab-browse">
-    <nav class="areas" aria-label="Research areas"></nav>
+<main class="page" id="main">
+  <section id="view-home"><div id="rails"></div></section>
+
+  <section id="view-search" hidden>
+    <div class="view-head">
+      <div>
+        <h2 class="view-title">Closest papers</h2>
+        <p class="note" id="search-note" aria-live="polite"></p>
+      </div>
+      <div class="view-actions">
+        <button class="btn quiet small" id="copy-search" type="button" hidden>Copy link</button>
+        <button class="btn quiet small" id="clear-search" type="button">Clear search</button>
+      </div>
+    </div>
+    <div class="grid" id="results"></div>
+  </section>
+
+  <section id="view-area" hidden>
+    <div class="view-head">
+      <div>
+        <button class="back" type="button" data-home>All papers</button>
+        <h2 class="view-title" id="area-name"></h2>
+        <p class="note" id="area-sub"></p>
+      </div>
+    </div>
     <div id="shelves"></div>
   </section>
 
-  <section id="search" role="tabpanel" aria-labelledby="tab-search" hidden>
-    <label class="search-label" for="q">Type a topic or paste your abstract</label>
-    <textarea id="q" rows="3" placeholder="e.g. memory for long-horizon web agents"></textarea>
-    <p class="note" id="search-note" aria-live="polite"></p>
-    <ol class="list" id="results"></ol>
+  <section id="view-saved" hidden>
+    <div class="view-head">
+      <div>
+        <button class="back" type="button" data-home>All papers</button>
+        <h2 class="view-title">Your reading list</h2>
+        <p class="note">Saved in this browser, no account needed.</p>
+      </div>
+      <div class="view-actions" id="saved-actions" hidden>
+        <button class="btn quiet small" id="copy-saved" type="button">Copy the list</button>
+        <button class="btn quiet small" id="clear-saved" type="button">Clear</button>
+      </div>
+    </div>
+    <details class="zotero" id="zotero" hidden>
+      <summary><h3>Add these papers to Zotero</h3><span class="chev" aria-hidden="true"></span></summary>
+      <div class="zotero-ways">
+        <div class="way" id="way-ids">
+          <h4>With PDFs <span class="tag">Recommended</span></h4>
+          <ol>
+            <li><button class="btn amber small" id="copy-ids" type="button">Copy arXiv IDs</button></li>
+            <li>In Zotero, click the magic wand <span class="muted">(Add Item by Identifier)</span></li>
+            <li>Paste and press Enter</li>
+          </ol>
+          <p class="way-note" id="ids-note"></p>
+        </div>
+        <div class="way">
+          <h4>As a file</h4>
+          <ol>
+            <li><a class="btn quiet small" id="zotero-saved" download="neurips2026-reading-list.ris" aria-disabled="true">Download the file</a></li>
+            <li>In Zotero, choose File, then Import</li>
+            <li>For a PDF, right-click a paper and choose Find Available PDF</li>
+          </ol>
+          <p class="way-note">Includes every saved paper. Also works in Mendeley and EndNote.</p>
+        </div>
+      </div>
+    </details>
+    <div class="grid" id="saved-list"></div>
+    <p class="empty" id="saved-empty">Nothing saved yet. Tap Save on any paper and it will wait for you here.</p>
   </section>
+
+  <aside class="follow">
+    <div>
+      <h2>Liked finding papers this way?</h2>
+      <p>I write about AI/ML research and the business of AI on LinkedIn, including paper reviews: what a paper does, why it matters, and whether it's worth your time. Follow along for more.</p>
+    </div>
+    <a class="btn amber" href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">Follow Roy on LinkedIn</a>
+  </aside>
 </main>
 
-<footer>
+<dialog id="detail" aria-labelledby="detail-title">
+  <button class="close" type="button" id="close-detail" aria-label="Close">✕</button>
+  <div id="detail-body"></div>
+</dialog>
+
+<footer class="page">
+  <div class="maker">
+    <p>Made by <strong>Roy Benjamin</strong>. <a href="https://www.linkedin.com/in/roy-b" target="_blank" rel="noopener">LinkedIn</a> <a href="https://roybenjamin.com" target="_blank" rel="noopener">Website</a></p>
+    <a class="btn quiet small coffee" href="https://buymeacoffee.com/roybenjamin" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  </div>
   <p id="asof"></p>
-  <p>Ranking: orals, then spotlights, then posters, each ordered by Hugging Face upvotes, alphaXiv votes and GitHub stars (log-scaled and added). A number only appears when we're sure it belongs to that paper. Research areas are grouped automatically from titles and abstracts, so some papers sit near a border.</p>
-  <p>Paper data from the official neurips.cc program. Your searches stay in your browser.</p>
+  <p>How papers are ranked: orals, then spotlights, then posters, each ordered by Hugging Face upvotes, alphaXiv votes and GitHub stars (log-scaled and added). A number only appears when we're sure it belongs to that paper. Search orders by match, with a small lift for orals, spotlights and buzz. Areas are grouped automatically from titles and abstracts. First-page images come from Hugging Face.</p>
+  <p>Paper data from the official neurips.cc program. Your searches and reading list stay in your browser.</p>
   <p class="credit">Inspired by Jueun Kim's <a href="https://juevn.github.io/neurips2026/">NeurIPS 2026 Explorer</a>.</p>
 </footer>
 
-<script src="data/papers.js"></script>
-<script type="module" src="app.js"></script>
+<script src="data/papers.js?v=5c9378599b"></script>
+<script type="module" src="app.js?v=5c9378599b"></script>
 </body>
 </html>
