@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://roybenjamin.com/neurips2026/">
 <meta property="og:site_name" content="NeurIPS 2026, from home">
-<meta property="og:image" content="https://roybenjamin.com/neurips2026/og.jpg?v=284e6e6bad">
+<meta property="og:image" content="https://roybenjamin.com/neurips2026/og.jpg?v=ab363755f3">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NeurIPS 2026, from home">
 <meta name="twitter:description" content="Swipe through the NeurIPS 2026 papers people are talking about, the main talks, and the best of your area.">
-<meta name="twitter:image" content="https://roybenjamin.com/neurips2026/og.jpg?v=284e6e6bad">
+<meta name="twitter:image" content="https://roybenjamin.com/neurips2026/og.jpg?v=ab363755f3">
 <script>
   // Apply a saved theme before first paint, so the page doesn't flash.
   try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://cdn-thumbnails.huggingface.co">
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <script defer src="https://cloud.umami.is/script.js" data-website-id="94aa27b7-892a-4967-a56b-8dd4512ee132" data-domains="roybenjamin.com"></script>
-<link rel="stylesheet" href="style.css?v=284e6e6bad">
+<link rel="stylesheet" href="style.css?v=ab363755f3">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232747D9'/><circle cx='16' cy='16' r='8' fill='none' stroke='%23FFB627' stroke-width='3'/><path d='M16 11v5l3 2' stroke='%23FFB627' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
 </head>
 <body>
@@ -39,6 +39,7 @@
       <ul class="clocks" id="clocks" aria-label="Local time in each conference city"></ul>
     </div>
     <div class="top-actions">
+      <a class="pill-btn numbers-top" href="#numbers" data-umami-event="numbers-topbar" aria-label="NeurIPS 2026 by the numbers" title="NeurIPS 2026 by the numbers"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span class="label">By the numbers</span></a>
       <a class="pill-btn follow-top" href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="topbar" target="_blank" rel="noopener">Follow on LinkedIn</a>
       <a class="theme follow-icon" href="https://www.linkedin.com/in/roy-b" data-umami-event="follow-linkedin" data-umami-event-where="topbar-phone" target="_blank" rel="noopener" aria-label="Follow Roy on LinkedIn" title="Follow Roy on LinkedIn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM3.3 9h3.4v11.5H3.3V9Zm5.6 0h3.3v1.6h.05c.46-.87 1.58-1.8 3.26-1.8 3.48 0 4.12 2.29 4.12 5.27v6.43h-3.4v-5.7c0-1.36-.03-3.1-1.9-3.1-1.9 0-2.19 1.48-2.19 3v5.8H8.9V9Z"/></svg>
@@ -137,6 +138,17 @@
     <p class="empty" id="saved-empty">Nothing saved yet. Tap Save on any paper and it will wait for you here.</p>
   </section>
 
+  <section id="view-numbers" hidden>
+    <div class="view-head">
+      <div>
+        <button class="back" type="button" data-home>All papers</button>
+        <h2 class="view-title">NeurIPS 2026 in numbers</h2>
+        <p class="note">What all the papers say about the field. Tap a paper or an area to dig in.</p>
+      </div>
+    </div>
+    <div class="numbers" id="numbers-body"></div>
+  </section>
+
   <aside class="follow" id="follow">
     <div>
       <h2>Liked finding papers this way?</h2>
@@ -157,12 +169,13 @@
     <a class="btn quiet small coffee" href="https://buymeacoffee.com/roybenjamin" data-umami-event="coffee" target="_blank" rel="noopener">☕ Buy me a coffee</a>
   </div>
   <p id="asof"></p>
+  <p><a href="#numbers" data-umami-event="numbers-footer">NeurIPS 2026 in numbers</a>: the cities, the buzz, the spotlight odds and who's publishing.</p>
   <p>How papers are ranked: main talks, then spotlights, then posters, each ordered by Hugging Face upvotes, alphaXiv votes and GitHub stars (log-scaled and added). A number only appears when we're sure it belongs to that paper. Search orders by match, with a small lift for main talks, spotlights and buzz. Areas are grouped automatically from titles and abstracts. First-page images come from Hugging Face.</p>
   <p>Paper data from the official neurips.cc program. Visits and clicks are counted anonymously, with no cookies. What you search and save stays in your browser.</p>
   <p class="credit">Inspired by Jueun Kim's <a href="https://juevn.github.io/neurips2026/">NeurIPS 2026 Explorer</a>.</p>
 </footer>
 
-<script src="data/papers.js?v=284e6e6bad"></script>
-<script type="module" src="app.js?v=284e6e6bad"></script>
+<script src="data/papers.js?v=ab363755f3"></script>
+<script type="module" src="app.js?v=ab363755f3"></script>
 </body>
 </html>

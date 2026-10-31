@@ -1,4 +1,5 @@
-import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=284e6e6bad";
+import { numbersHTML, teaserHTML } from "./numbers.js?v=ab363755f3";
+import { shelves, rails, cardHTML, detailHTML, topK, keywordSearch, parseHash, cityCounts, cityTime, readingListText, pilePapers, pileTag, thumbURL, risFor, arxivIds, esc } from "./rank.js?v=ab363755f3";
 
 const { meta, areas, papers } = window.CATCHUP;
 
@@ -42,8 +43,8 @@ $("#theme").addEventListener("click", () => {
   try { localStorage.setItem("theme", next); } catch {}
 });
 
-/* Views: home (rails), search, area, reading list */
-const VIEWS = ["home", "search", "area", "saved"];
+/* Views: home (rails), search, area, reading list, numbers */
+const VIEWS = ["home", "search", "area", "saved", "numbers"];
 const setHash = (h) => history.replaceState(null, "", h || location.pathname + location.search);
 // The follow banner sits early on the home page (most visitors scroll that far), else at the end.
 function showView(view) {
@@ -140,7 +141,7 @@ const railHTML = (r, id = "") => `
     </div>
   </section>`;
 function renderRails() {
-  $("#rails").innerHTML = `<div id="saved-rail"></div>` + rails(papers, areas).map((r, n) => (n === 2 ? `<div id="follow-slot"></div>` : "") + railHTML({
+  $("#rails").innerHTML = `<div id="saved-rail"></div>` + rails(papers, areas).map((r, n) => (n === 2 ? `<div id="follow-slot"></div>` : n === 6 ? `<div id="numbers-slot"></div>` : "") + railHTML({
     ...r,
     sub: r.area !== undefined ? `${areas[r.area].n_oral} main talks, ${areas[r.area].n_spotlight} spotlights` : "",
     more: r.area !== undefined ? `data-area="${r.area}"` : "",
@@ -158,8 +159,8 @@ document.addEventListener("click", (e) => {
     row.scrollBy({ left: (arrow.classList.contains("next") ? 1 : -1) * row.clientWidth * 0.9, behavior: "smooth" });
   }
   const more = e.target.closest("[data-area]:not([data-abstract-for])");
-  if (more && more.classList.contains("see-all")) {
-    track("open-area", { area: areas[+more.dataset.area].name });
+  if (more && (more.classList.contains("see-all") || more.closest("#view-numbers"))) {
+    track("open-area", { area: areas[+more.dataset.area].name, from: more.closest("#view-numbers") ? "numbers" : "rail" });
     pickArea(+more.dataset.area);
     setHash(`#area=${encodeURIComponent(areas[+more.dataset.area].name)}`);
     toMain();
@@ -185,7 +186,7 @@ const dialog = $("#detail");
 const details = new Map(); // area -> Promise of {id: {ab: abstract, au: authors}}
 function detailsFor(area) {
   if (!details.has(area)) {
-    details.set(area, fetch(`data/details/${area}.json?v=284e6e6bad`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
+    details.set(area, fetch(`data/details/${area}.json?v=ab363755f3`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))));
     details.get(area).catch(() => details.delete(area));
   }
   return details.get(area);
@@ -252,7 +253,7 @@ document.addEventListener("click", (e) => {
   }
   const open = e.target.closest("[data-open]");
   if (open) {
-    const from = open.closest(".pile") ? "pile" : open.closest("#results") ? "search" : open.closest("#saved-list, #saved-rail") ? "reading-list" : open.closest("#shelves") ? "area" : "rail";
+    const from = open.closest("#view-numbers, #numbers-slot") ? "numbers" : open.closest(".pile") ? "pile" : open.closest("#results") ? "search" : open.closest("#saved-list, #saved-rail") ? "reading-list" : open.closest("#shelves") ? "area" : "rail";
     const p = byId.get(open.dataset.open);
     track("open-paper", { from, tier: ["oral", "spotlight", "poster"][p.tier], area: areas[p.a].name });
     openDetail(open.dataset.open);
@@ -355,11 +356,33 @@ async function runSearch(scroll = false) {
   if (scroll) toMain();
 }
 
+/* Numbers: what the whole program says about the field (data/numbers.json, 3 KB). */
+const areaIndex = new Map(areas.map((a, i) => [a.name, i]));
+const numbers = fetch("data/numbers.json?v=ab363755f3").then((r) => r.json()).catch(() => null);
+numbers.then((n) => {
+  if (n && $("#numbers-slot")) $("#numbers-slot").innerHTML = teaserHTML(n, { byId, areaIndex });
+});
+async function openNumbers() {
+  track("view-numbers");
+  showView("numbers");
+  setHash("#numbers");
+  toMain();
+  const n = await numbers;
+  $("#numbers-body").innerHTML = n ? numbersHTML(n, { byId, areaIndex }) : `<p class="empty">The numbers couldn't load. Try refreshing the page.</p>`;
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest('a[href="#numbers"]')) {
+    e.preventDefault();
+    openNumbers();
+  }
+});
+
 /* Start from the URL so links can be shared. */
 renderRails();
 showView("home");
 const start = parseHash(location.hash, areas);
 if (location.hash.startsWith("#area=")) pickArea(start.area);
+else if (location.hash === "#numbers") openNumbers();
 else if (location.hash === "#saved") {
   renderSaved();
   showView("saved");

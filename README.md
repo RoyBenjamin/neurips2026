@@ -14,6 +14,7 @@ A static site with no build step and no server.
 - `index.html`, `style.css`: the page.
 - `app.js`: views, search, the reading list and the Zotero (RIS) export.
 - `rank.js`: the order within an area, and the links for each paper.
+- `numbers.js`, `data/numbers.json`: the "By the numbers" view (cities, buzz, spotlight odds, agents, who's publishing, titles).
 - `data/papers.js`: every paper with its area, tier and buzz numbers.
 - `data/details/`: abstracts and authors, one file per area, loaded when you open that area.
 - `data/embeddings.bin`: one vector per paper. Search embeds your query in the browser
